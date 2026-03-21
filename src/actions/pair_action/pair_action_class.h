@@ -245,9 +245,11 @@ class PairAction : public Action {
             double tot = 0.;
             const auto particle_pairs(GenerateParticlePairs());
             size_t n_particle_pairs = particle_pairs.size();
+            uint32_t bead_start, bead_end;
+            path.GetBeadRange(bead_start, bead_end);
 #pragma omp parallel for collapse(2) reduction(+ : tot)
             for (uint32_t i = 0; i < n_particle_pairs; i++) {
-                for (uint32_t b_i = 0; b_i < species_a->GetNBead(); ++b_i) {
+                for (uint32_t b_i = bead_start; b_i < bead_end; ++b_i) {
                     double r_mag, r_p_mag, r_r_p_mag;
                     path.DrDrpDrrp(b_i, b_i + 1, species_a, species_b, particle_pairs[i].first, particle_pairs[i].second, r_mag, r_p_mag, r_r_p_mag);
                     tot += CalcdUdBeta(r_mag, r_p_mag, r_r_p_mag, 0);
@@ -255,6 +257,9 @@ class PairAction : public Action {
             }
             if (use_long_range)
                 tot += CalcdUdBetaLong();
+            double global_tot;
+            path.GetIntraComm().AllSum(tot, global_tot);
+            tot = global_tot;
             if (is_first_time) {
                 is_first_time = false;
                 dUdB_constant = tot;
@@ -373,9 +378,11 @@ class PairAction : public Action {
             double tot = 0.;
             const auto particle_pairs(GenerateParticlePairs());
             size_t n_particle_pairs = particle_pairs.size();
+            uint32_t bead_start, bead_end;
+            path.GetBeadRange(bead_start, bead_end);
 #pragma omp parallel for collapse(2) reduction(+ : tot)
             for (uint32_t i = 0; i < n_particle_pairs; i++) {
-                for (uint32_t b_i = 0; b_i < species_a->GetNBead(); ++b_i) {
+                for (uint32_t b_i = bead_start; b_i < bead_end; ++b_i) {
                     uint32_t b_j = b_i + 1;
                     vec<double> dr(path.Dr(species_a->GetBead(particle_pairs[i].first, b_i), species_b->GetBead(particle_pairs[i].second, b_i)));
                     double r_mag = mag(dr);
@@ -386,6 +393,9 @@ class PairAction : public Action {
             }
             if (use_long_range)
                 tot += CalcVLong();
+            double global_tot;
+            path.GetIntraComm().AllSum(tot, global_tot);
+            tot = global_tot;
             if (is_first_time) {
                 is_first_time = false;
                 potential_constant = tot;

@@ -44,7 +44,8 @@ class Writes : public Event {
         gettimeofday(&time, NULL);  // Current Time
         double block_time = start - end;
         double total_time = start - initial;
-        std::cout << "Clone #: " << proc_i << ", Block #: " << block_i << ", Block Time: " << block_time << ", Total Time: " << total_time << std::endl;
+        if (out.is_writer)
+            std::cout << "Clone #: " << proc_i << ", Block #: " << block_i << ", Block Time: " << block_time << ", Total Time: " << total_time << std::endl;
 
         block_i += 1;
 

@@ -18,17 +18,25 @@ class Path {
     uint32_t n_bead_;                                ///< Total number of time slices
     uint32_t n_d_;                                   ///< Number of spatial dimensions
     std::vector<std::shared_ptr<Species>> species_;  ///< Vector holding pointers to all species objects
+    Communicator intra_comm_;                         ///< Communicator for processes within the same walker group
+    uint32_t intra_proc_;                            ///< Cached rank within intra_comm
+    uint32_t intra_nprocs_;                          ///< Cached number of processes in intra_comm
    public:
     KSpace ks;  ///< K space data container
 
     /// Constructor sets system specific variables
-    Path(uint32_t proc_i, Input &in, IO &out, RNG &rng)
+    Path(uint32_t proc_i, Input &in, IO &out, RNG &rng, Communicator &intra_comm)
         : n_d_(in.GetChild("System").GetAttribute<uint32_t>("n_d")),
           n_bead_(in.GetChild("System").GetAttribute<uint32_t>("n_bead")),
           beta_(in.GetChild("System").GetAttribute<double>("beta")),
           pbc_(in.GetChild("System").GetAttribute<bool>("pbc", true)),
           L_(in.GetChild("System").GetAttribute<double>("L", 0.)),
-          importance_weight_(1.) {
+          importance_weight_(1.),
+          intra_comm_(intra_comm) {
+        // Cache MPI info
+        intra_proc_ = intra_comm_.MyProc();
+        intra_nprocs_ = intra_comm_.NumProcs();
+
         // Computed constants
         if (pbc_) {
             iL_ = 1. / L_;
@@ -79,6 +87,21 @@ class Path {
 
     /// Return surface
     const double GetSurface() { return surface_; }
+
+    /// Return the intra-group communicator
+    Communicator& GetIntraComm() { return intra_comm_; }
+
+    /// Return the rank within the intra-group communicator
+    uint32_t GetIntraProc() const { return intra_proc_; }
+
+    /// Return the number of processes in the intra-group communicator
+    uint32_t GetIntraNumProcs() const { return intra_nprocs_; }
+
+    /// Get the bead range for this process (for MPI parallelization)
+    void GetBeadRange(uint32_t &start, uint32_t &end) const {
+        start = (n_bead_ * intra_proc_) / intra_nprocs_;
+        end = (n_bead_ * (intra_proc_ + 1)) / intra_nprocs_;
+    }
 
     /// Sets species index by matching the species name string
     std::shared_ptr<Species> GetSpecies(const std::string &species_name) {

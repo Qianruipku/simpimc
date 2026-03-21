@@ -59,18 +59,23 @@ class IlkkaPairAction : public PairAction {
         field<vec<std::complex<double>>> &rho_k_a(species_a->GetRhoK());
         field<vec<std::complex<double>>> &rho_k_b(species_b->GetRhoK());
 
-        // Sum over k std::vectors
+        // Sum over k std::vectors (MPI-split bead loop)
         double tot = 0.;
         size_t n_ks = path.ks.vecs.size();
+        uint32_t bead_start, bead_end;
+        path.GetBeadRange(bead_start, bead_end);
 #pragma omp parallel for collapse(2) reduction(+ : tot)
         for (uint32_t k_i = 0; k_i < n_ks; k_i++)
-            for (uint32_t b_i = 0; b_i < path.GetNBead(); b_i++)
+            for (uint32_t b_i = bead_start; b_i < bead_end; b_i++)
                 tot += v_long_k(k_i) * CMag2(rho_k_a(b_i)(k_i), rho_k_b(b_i)(k_i));
 
         if (species_a != species_b)
             tot *= 2.;
 
-        return tot + v_long_k_0 + v_long_r_0;
+        if (path.GetIntraProc() == 0)
+            tot += v_long_k_0 + v_long_r_0;
+
+        return tot;
     }
 
     /// Calculate the action
@@ -154,18 +159,23 @@ class IlkkaPairAction : public PairAction {
         field<vec<std::complex<double>>> &rho_k_a(species_a->GetRhoK());
         field<vec<std::complex<double>>> &rho_k_b(species_b->GetRhoK());
 
-        // Sum over k std::vectors
+        // Sum over k std::vectors (MPI-split bead loop)
         double tot = 0.;
         size_t n_ks = path.ks.vecs.size();
+        uint32_t bead_start, bead_end;
+        path.GetBeadRange(bead_start, bead_end);
 #pragma omp parallel for collapse(2) reduction(+ : tot)
         for (uint32_t k_i = 0; k_i < n_ks; k_i++)
-            for (uint32_t b_i = 0; b_i < path.GetNBead(); b_i++)
+            for (uint32_t b_i = bead_start; b_i < bead_end; b_i++)
                 tot += du_long_k(k_i) * CMag2(rho_k_a(species_a->bead_loop(b_i))(k_i), rho_k_b(species_b->bead_loop(b_i))(k_i));
 
         if (species_a != species_b)
             tot *= 2.;
 
-        return tot + du_long_k_0 + du_long_r_0;
+        if (path.GetIntraProc() == 0)
+            tot += du_long_k_0 + du_long_r_0;
+
+        return tot;
     }
 
     /// Calculate the gradient of the action for the particle pair p_i, p_j in the direction of particle p_i

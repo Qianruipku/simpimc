@@ -10,6 +10,8 @@ class IO
 {
 public:
   std::string file_name;
+  bool is_writer;  ///< If false, all write operations are no-ops (for non-master procs in a group)
+  IO() : is_writer(true) {}
   void Load(std::string &tmp_file_name)
   {
     file_name = tmp_file_name;
@@ -17,6 +19,7 @@ public:
 
   void Create()
   {
+    if (!is_writer) return;
     // Create file
     H5::H5File* file = new H5::H5File(file_name, H5F_ACC_TRUNC);
 
@@ -46,6 +49,7 @@ public:
   template<class T>
   void Write(const std::string &dataset_name, T& data)
   {
+    if (!is_writer) return;
     // Open file
     H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 
@@ -69,6 +73,7 @@ public:
   template<class T>
   void Rewrite(const std::string &dataset_name, T& data)
   {
+    if (!is_writer) return;
     // Open file
     H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 
@@ -91,6 +96,7 @@ public:
   // Create Group
   void CreateGroup(const std::string &group_name)
   {
+    if (!is_writer) return;
     // Open file
     H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 
@@ -105,6 +111,7 @@ public:
   template<class T>
   void CreateExtendableDataSet(const std::string &prefix, const std::string &dataset_name, T& data)
   {
+    if (!is_writer) return;
     // Open file
     H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 
@@ -162,6 +169,7 @@ public:
   template<class T>
   void AppendDataSet(const std::string &prefix, const std::string &dataset_name, T& data)
   {
+    if (!is_writer) return;
     // Open file
     H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 
@@ -239,6 +247,7 @@ void IO::Read(const std::string &dataset_name, std::string &data)
 template<>
 void IO::Write(const std::string &dataset_name, std::string &data)
 {
+  if (!is_writer) return;
   // Open file
   H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 
@@ -262,6 +271,7 @@ void IO::Write(const std::string &dataset_name, std::string &data)
 template<>
 void IO::Rewrite(const std::string &dataset_name, std::string &data)
 {
+  if (!is_writer) return;
   // Open file
   H5::H5File* file = new H5::H5File(file_name, H5F_ACC_RDWR);
 

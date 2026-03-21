@@ -33,15 +33,19 @@ class Kinetic : public SingleAction {
 
     /// Returns the beta derivative of the action for the whole path
     virtual double DActionDBeta() {
-        double tot(d_action_d_beta_const);  // Constant term
+        // Constant term only on proc 0 to avoid double-counting after AllReduce
+        double tot = (path.GetIntraProc() == 0) ? d_action_d_beta_const : 0.;
+        uint32_t bead_start, bead_end;
+        path.GetBeadRange(bead_start, bead_end);
 #pragma omp parallel for collapse(2) reduction(+ : tot)
-        for (uint32_t b_i = 0; b_i < species->GetNBead(); b_i++) {
+        for (uint32_t b_i = bead_start; b_i < bead_end; b_i++) {
             for (uint32_t p_i = 0; p_i < species->GetNPart(); p_i++) {
                 tot += rho_free_splines[0].GetDLogRhoFreeDTau(path.Dr(species->GetBead(p_i, b_i), species->GetBead(p_i, b_i)->GetNextBead(1)));
             }
         }
-
-        return tot;
+        double global_tot;
+        path.GetIntraComm().AllSum(tot, global_tot);
+        return global_tot;
     }
 
     /// Returns the virial contribution of the action

@@ -2,7 +2,7 @@ import sys, os
 from math import sqrt, pi
 
 # Exact location of PAGEN scripts
-PAGEN_HOME = '../../scripts/pagen'
+PAGEN_HOME = '../../../scripts/pagen'
 sys.path.append(PAGEN_HOME)
 from GenPairAction import *
 
@@ -11,8 +11,8 @@ units = {'energy':'H', 'distance':'A'}
 
 # Settings for e-gas
 M = 128 # number of time slices
-N = 7 # number electrons
-pol = 1 # if polarized or not
+N = 2 # number electrons
+pol = 0 # if polarized or not
 theta = 1. # T/T_F
 rs = 1. # Wigner Seits Radius
 

@@ -13,8 +13,8 @@ class Simulation {
     Path path;                                     ///< Main data structure
    public:
     /// Constructor initializes everything
-    Simulation(Input& in, IO& out, RNG& rng, const uint32_t proc_i)
-        : path(proc_i, in, out, rng) {
+    Simulation(Input& in, IO& out, RNG& rng, const uint32_t proc_i, Communicator& intra_comm)
+        : path(proc_i, in, out, rng, intra_comm) {
         // Initialize Actions
         out.CreateGroup("Actions");
         for (auto& input : in.GetChild("Actions").GetChildList("Action"))
@@ -40,7 +40,8 @@ class Simulation {
 
     /// Runs the algorithm by calling the DoEvent of the main_loop
     void Run() {
-        std::cout << "Running main loop..." << std::endl;
+        if (path.GetIntraProc() == 0)
+            std::cout << "Running main loop..." << std::endl;
         main_loop.DoEvent();
     };
 };

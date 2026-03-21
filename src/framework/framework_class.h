@@ -34,6 +34,7 @@ class Framework {
     Communicator world_comm;  ///< This is the global MPIWORLD communicator.
     Communicator inter_comm;  ///< This is for communication between the rank 0 procs of each walker group.
     Communicator intra_comm;  ///< This is for commmunication between procs within a walker group.
+    uint32_t my_group_;       ///< Index of this process's walker group
    public:
     /// Constructor does nothing.
     Framework(std::string in_file) {
@@ -45,8 +46,8 @@ class Framework {
         uint32_t N = world_comm.NumProcs();
         assert((N % procs_per_group) == 0);
         uint32_t n_groups = N / procs_per_group;
-        uint32_t my_group = world_comm.MyProc() / procs_per_group;
-        world_comm.Split(my_group, intra_comm);
+        my_group_ = world_comm.MyProc() / procs_per_group;
+        world_comm.Split(my_group_, intra_comm);
         vec<int> ranks(n_groups);
         for (uint32_t group = 0; group < n_groups; group++)
             ranks(group) = group * procs_per_group;
@@ -67,9 +68,10 @@ class Framework {
 
         // Output
         std::stringstream tmp_ss;
-        tmp_ss << in.GetChild("IO").GetAttribute<std::string>("output_prefix") << "." << my_group << ".h5";
+        tmp_ss << in.GetChild("IO").GetAttribute<std::string>("output_prefix") << "." << my_group_ << ".h5";
         std::string output = tmp_ss.str();
         out.Load(output);
+        out.is_writer = (intra_comm.MyProc() == 0);
         out.Create();
 
         // Write input data
@@ -85,13 +87,13 @@ class Framework {
         int seed = 12345;
         if (rng_in.node.name == "null") {
 #if USE_MPI
-            seed = (int)time(0) * (world_comm.MyProc() + 1);
+            seed = (int)time(0) * (my_group_ + 1);
 #else
             seed = (int)time(0);
 #endif
         } else {
 #if USE_MPI
-            seed = in.GetChild("RNG").GetAttribute<int>("seed", (int)time(0) * (world_comm.MyProc() + 1));
+            seed = in.GetChild("RNG").GetAttribute<int>("seed", (int)time(0) * (my_group_ + 1));
 #else
             seed = in.GetChild("RNG").GetAttribute<int>("seed", (int)time(0));
 #endif
@@ -101,7 +103,7 @@ class Framework {
         out.Write("RNG/seed", seed);
 
         // Simulation
-        Simulation sim(in, out, rng, inter_comm.MyProc());
+        Simulation sim(in, out, rng, my_group_, intra_comm);
         sim.Run();
     }
 };
