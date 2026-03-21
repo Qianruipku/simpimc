@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -29,20 +29,20 @@ class Observable:
         self.start_cut = start_cut
 
     def Process(self, files):
-        print 'Processing', self.prefix+self.name
+        print('Processing', self.prefix+self.name)
         stats = self.GetDataStats(files)
         self.WriteToFile(stats)
 
     def GetDataStats(self, files):
-        print 'GetDataStats not defined for', self.name
+        print('GetDataStats not defined for', self.name)
         return 0
 
     def WriteToFile(self, stats):
-        print 'WriteToFile not defined for', self.name
+        print('WriteToFile not defined for', self.name)
         return 0
 
     def AdjustBySign(self, sign_data):
-        print 'AdjustBySign not defined for', self.name
+        print('AdjustBySign not defined for', self.name)
         return 0
 
 # Scalar variables
@@ -61,13 +61,13 @@ class Scalar(Observable):
                     f.close()
                     file_not_read = False
                 except IOError as e:
-                    print 'Trouble reading', self.prefix+self.name, 'in', file
+                    print('Trouble reading', self.prefix+self.name, 'in', file)
                     failure_i += 1
                 except KeyError as e:
-                    print 'Data not found for', self.prefix+self.name, 'in', file
+                    print('Data not found for', self.prefix+self.name, 'in', file)
                     file_not_read = False
             if (failure_i == max_failure):
-                print 'Skipping', self.prefix+self.name, 'in', file
+                print('Skipping', self.prefix+self.name, 'in', file)
         stats = Stats.UnweightedAvg(np.array(data))
         return stats
 
@@ -113,20 +113,21 @@ class Histogram(Observable):
                         yStats[j].append(Stats.stats(np.array(ys[i])))
                     file_not_read = False
                 except IOError as e:
-                    print 'Trouble reading', self.prefix+self.name, 'in', file
+                    print('Trouble reading', self.prefix+self.name, 'in', files[j])
                     failure_i += 1
                 except KeyError as e:
-                    print 'Data not found for', self.prefix+self.name, 'in', file
+                    print('Data not found for', self.prefix+self.name, 'in', files[j])
                     file_not_read = False
             if (failure_i == max_failure):
-                print 'Skipping', self.prefix+self.name, 'in', file
+                print('Skipping', self.prefix+self.name, 'in', files[j])
         stats = []
         for i in range(len(xs)):
             yStatsi = [x[i] for x in yStats]
             stats.append(Stats.UnweightedAvg(np.array(yStatsi)))
         return (xs, stats)
 
-    def WriteToFile(self, (xs, stats)):
+    def WriteToFile(self, xs_stats):
+        xs, stats = xs_stats
         if not os.path.exists(self.basename):
             os.makedirs(self.basename)
         g = open(self.basename+'/'+self.name+'.dat','w')
@@ -169,13 +170,13 @@ class Pair(Observable):
                     f.close()
                     file_not_read = False
                 except IOError as e:
-                    print 'Trouble reading', self.prefix+self.name, 'in', file
+                    print('Trouble reading', self.prefix+self.name, 'in', file)
                     failure_i += 1
                 except KeyError as e:
-                    print 'Data not found for', self.prefix+self.name, 'in', file
+                    print('Data not found for', self.prefix+self.name, 'in', file)
                     file_not_read = False
             if (failure_i == max_failure):
-                print 'Skipping', self.prefix+self.name, 'in', file
+                print('Skipping', self.prefix+self.name, 'in', file)
             for pair in pairs:
                 try:
                     ys[pair[0]] += pair[1]
@@ -188,7 +189,8 @@ class Pair(Observable):
             ys[x] = (ys[x]*1.)/(tot*1.)
         return (xs, ys)
 
-    def WriteToFile(self, (xs, ys)):
+    def WriteToFile(self, xs_ys):
+        xs, ys = xs_ys
         if not os.path.exists(self.basename):
             os.makedirs(self.basename)
         g = open(self.basename+'/'+self.name+'.dat','w')
@@ -218,13 +220,13 @@ class AvgPair(Observable):
                     f.close()
                     file_not_read = False
                 except IOError as e:
-                    print 'Trouble reading', self.prefix+self.name, 'in', file
+                    print('Trouble reading', self.prefix+self.name, 'in', file)
                     failure_i += 1
                 except KeyError as e:
-                    print 'Data not found for', self.prefix+self.name, 'in', file
+                    print('Data not found for', self.prefix+self.name, 'in', file)
                     file_not_read = False
             if (failure_i == max_failure):
-                print 'Skipping', self.prefix+self.name, 'in', file
+                print('Skipping', self.prefix+self.name, 'in', file)
             for avg_pair in avg_pairs:
                 sector = avg_pair[0]
                 [eM,varM,M] = avg_pair[1:]
@@ -240,7 +242,8 @@ class AvgPair(Observable):
             ys[x][1] = np.sqrt(ys[x][1]/ys[x][2])
         return (xs, ys)
 
-    def WriteToFile(self, (xs, ys)):
+    def WriteToFile(self, xs_ys):
+        xs, ys = xs_ys
         if not os.path.exists(self.basename):
             os.makedirs(self.basename)
         g = open(self.basename+'/'+self.name+'.dat','w')
@@ -278,15 +281,15 @@ class Matrix(Observable):
                     f.close()
                     file_not_read = False
                 except IOError as e:
-                    print 'Trouble reading', self.prefix+self.name, 'in', file
+                    print('Trouble reading', self.prefix+self.name, 'in', file)
                     failure_i += 1
                 except KeyError as e:
-                    print 'Data not found for', self.prefix+self.name, 'in', file
+                    print('Data not found for', self.prefix+self.name, 'in', file)
                     file_not_read = False
             if (failure_i == max_failure):
-                print 'Skipping', self.prefix+self.name, 'in', file
+                print('Skipping', self.prefix+self.name, 'in', file)
         stats = {}
-        for key,val in data.iteritems():
+        for key,val in data.items():
             stats[key] = Stats.UnweightedAvg(np.array(val))
         return stats
 
@@ -336,7 +339,7 @@ def AddObservable(f, section, obs, start_cut):
         obs.append(Matrix(prefix, section_name, section_type, start_cut))
 
 def usage(argv):
-    print "Usage: %s [start cut] file0.h5 file1.h5 ..." % os.path.basename(argv[0])
+    print("Usage: %s [start cut] file0.h5 file1.h5 ..." % os.path.basename(argv[0]))
     sys.exit(2)
 
 def main(argv=None):
@@ -380,7 +383,7 @@ def main(argv=None):
     if adjustBySign:
         for ob in obs:
             if ('Observables' in ob.basename) and (not ('Time' in ob.basename)) and (not ('Permutation' in ob.basename)) and (ob.type != 'Sign'):
-                print 'Adjusting', ob.name, 'by sign weight'
+                print('Adjusting', ob.name, 'by sign weight')
                 ob.AdjustBySign(sign_data)
 
 if __name__ == "__main__":

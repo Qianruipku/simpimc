@@ -22,9 +22,9 @@ tags
 *.ch
 *.dg
 *.dm
+INPUT
 inputs/*/*.txt
 inputs/*/INPUT
-data
 simpimc
 bin/
 build/

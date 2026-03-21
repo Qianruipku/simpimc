@@ -4,10 +4,9 @@ import ctypes as ct
 import numpy as np
 
 def module_path():
-    encoding = sys.getfilesystemencoding()
     if hasattr(sys, "frozen"):
-        return os.path.dirname(unicode(sys.executable, encoding))
-    return os.path.dirname(unicode(__file__, encoding))
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(__file__)
 
 StatsLib = ct.cdll.LoadLibrary(module_path()+'/stats.so')
 npct_double = np.ctypeslib.ndpointer(dtype=ct.c_double)
