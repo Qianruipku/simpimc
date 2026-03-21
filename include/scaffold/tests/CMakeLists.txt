@@ -1,6 +1,6 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
+PROJECT(SCAFFOLD_TEST)
 
-PROJECT(SIMPIMC)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #if you don't want the full compiler output, set to "OFF"
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -8,6 +8,7 @@ SET(CMAKE_VERBOSE_MAKEFILE OFF)
 #-------------------------------------------------------------------
 # Options
 #-------------------------------------------------------------------
+
 SET(PRECISION double) #double float
 SET(USE_MPI TRUE)
 SET(USE_OPENMP TRUE)
@@ -15,8 +16,7 @@ SET(BUILD_STATIC FALSE)
 SET(COMPILER_MAKE "GNU") # INTEL, GNU, or CLANG
 SET(SCAFFOLD_MATRIX_LIBRARY "ARMADILLO") # ARMADILLO or EIGEN
 SET(OPTIMIZE TRUE)
-SET(DEBUG FALSE)
-SET(BUILD_DOCUMENTATION FALSE)
+SET(DEBUG TRUE)
 
 #-------------------------------------------------------------------
 # Compilers
@@ -47,7 +47,7 @@ IF(${COMPILER_MAKE} MATCHES "CLANG")
     SET(CMAKE_CXX_COMPILER mpicxx)
   ELSE()
     SET(CMAKE_C_COMPILER clang)
-    SET(CMAKE_CXX_COMPILER clang++)
+    SET(CMAKE_CXX_COMPILER clang)
   ENDIF()
 ENDIF()
 
@@ -57,17 +57,15 @@ ENDIF()
 SET(COMMON_FLAGS "-w")
 
 IF(DEBUG)
-  SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -g -Wall")
-ELSE(DEBUG)
-  SET(COMMON_FLAGS "${COMMON_FLAGS} -DNDEBUG")
+  SET(COMMON_FLAGS "${COMMON_FLAGS} -pg -Wall")
 ENDIF(DEBUG)
 
 IF(OPTIMIZE)
-  SET(COMMON_FLAGS "${COMMON_FLAGS} -O3 -ffast-math")
+  SET(COMMON_FLAGS "${COMMON_FLAGS} -O3")
 ENDIF(OPTIMIZE)
 
 IF(USE_MPI)
-  SET(COMMON_FLAGS "${COMMON_FLAGS} -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK")
+  SET(COMMON_FLAGS "${COMMON_FLAGS} -DUSE_MPI")
 ENDIF(USE_MPI)
 
 IF(USE_OPENMP)
@@ -75,7 +73,10 @@ IF(USE_OPENMP)
 ENDIF(USE_OPENMP)
 
 SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
-SET(CMAKE_CXX_SOURCE_FILE_EXTENSIONS ,"cc")
+SET(CMAKE_CXX_SOURCE_FILE_EXTENSIONS ,"cpp")
+
+SET(CMAKE_C_FLAGS "-std=c99 ${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
+SET(CMAKE_C_SOURCE_FILE_EXTENSIONS ,"c")
 
 IF(BUILD_STATIC)
   # Enable static linking
@@ -108,7 +109,7 @@ SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build")
 #-------------------------------------------------------------------
 # Scaffold
 #-------------------------------------------------------------------
-SET(SCAFFOLD_DIR "${CMAKE_SOURCE_DIR}/include/scaffold")
+SET(SCAFFOLD_DIR "${CMAKE_SOURCE_DIR}/../")
 SET(SCAFFOLD_DEPENDS_DIR "${CMAKE_SOURCE_DIR}/depends")
 SET(SCAFFOLD_INSTALL_DIR "${CMAKE_SOURCE_DIR}")
 INCLUDE("${SCAFFOLD_DIR}/CMakeLists.txt")
@@ -116,81 +117,9 @@ SET(LIBS ${LIBS} ${SCAFFOLD_LIBS})
 SET(SRCS ${SRCS} ${SCAFFOLD_SRCS})
 
 #-------------------------------------------------------------------
-# Einspline
-#-------------------------------------------------------------------
-INCLUDE(CMake/FindSSE.cmake)
-INCLUDE(CMake/FindEinspline.cmake)
-SET(LIBS ${LIBS} ${EINSPLINE_LIBS})
-
-#-------------------------------------------------------------------
 # Sources and target
 #-------------------------------------------------------------------
-
-# simpimc
 SET (SRCS ${SRCS} src/main.cc)
-ADD_EXECUTABLE(simpimc ${SRCS})
-TARGET_LINK_LIBRARIES(simpimc ${LIBS})
-INSTALL(TARGETS simpimc DESTINATION $ENV{HOME}/bin)
-
-# Stats library
-ExternalProject_Add(
-  stats
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/scripts
-  CONFIGURE_COMMAND ""
-  BUILD_IN_SOURCE 1
-  BUILD_OMMAND make
-  INSTALL_COMMAND ""
-)
-
-# Documentation
-find_package(Doxygen)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
-find_package(Sphinx)
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen and Sphinx)" ${DOXYGEN_FOUND})
-if(BUILD_DOCUMENTATION)
-    if(NOT DOXYGEN_FOUND)
-        message(FATAL_ERROR "Doxygen is needed to build the documentation.")
-    endif()
-
-    set(doxyfile ${CMAKE_SOURCE_DIR}/docs/doxygen/Doxyfile)
-
-    add_custom_target(doxygen_doc
-        COMMAND cd ${CMAKE_SOURCE_DIR}/docs/doxygen && ${DOXYGEN_EXECUTABLE} ${doxyfile}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/html/doxygen
-        COMMENT "Generating API documentation with Doxygen"
-        VERBATIM)
-
-    if(NOT SPHINX_FOUND)
-        message("Sphinx is needed to build the documentation.")
-    endif()
-
-    if(NOT DEFINED SPHINX_THEME)
-        set(SPHINX_THEME default)
-    endif()
-
-    if(NOT DEFINED SPHINX_THEME_DIR)
-        set(SPHINX_THEME_DIR)
-    endif()
-
-    # configured documentation tools and intermediate build results
-    set(BINARY_BUILD_DIR "${CMAKE_SOURCE_DIR}/docs")
-
-    # Sphinx cache with pickled ReST documents
-    set(SPHINX_CACHE_DIR "${CMAKE_SOURCE_DIR}/docs/_doctrees")
-
-    # HTML output directory
-    set(SPHINX_HTML_DIR "${CMAKE_SOURCE_DIR}/docs/html")
-
-    add_custom_target(sphinx_doc
-        ${SPHINX_EXECUTABLE}
-            -q -b html
-            -c "${BINARY_BUILD_DIR}"
-            -d "${SPHINX_CACHE_DIR}"
-            "${CMAKE_SOURCE_DIR}/docs"
-            "${SPHINX_HTML_DIR}"
-        COMMENT "Building HTML documentation with Sphinx")
-
-    add_custom_target(doc
-      DEPENDS doxygen_doc sphinx_doc)
-
-endif()
+ADD_EXECUTABLE(scaffold_test ${SRCS})
+TARGET_LINK_LIBRARIES(scaffold_test ${LIBS})
+INSTALL(TARGETS scaffold_test DESTINATION $ENV{HOME}/bin)

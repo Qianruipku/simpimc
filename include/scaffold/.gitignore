@@ -1,0 +1,24 @@
+# Temporary files
+*.swp
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Tests generated folders
+tests/bin
+tests/lib
+tests/include
+tests/depends
+tests/build
+tests/share

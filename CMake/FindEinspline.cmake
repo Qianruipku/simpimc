@@ -1,3 +1,4 @@
+INCLUDE(ExternalProject)
 FIND_PATH(EINSPLINE_INCLUDE_DIR einspline $ENV{EINSPLINE_HOME}/include ${SCAFFOLD_INSTALL_DIR}/include)
 IF(BUILD_STATIC)
     FIND_LIBRARY(EINSPLINE_LIBS libeinspline.a $ENV{EINSPLINE_HOME}/lib $ENV{EINSPLINE_HOME}/lib64 ${SCAFFOLD_INSTALL_DIR}/lib)
@@ -21,7 +22,7 @@ ELSE()
       SOURCE_DIR ${SCAFFOLD_DEPENDS_DIR}/meinspline/meinspline-master
       UPDATE_COMMAND autoreconf -i
       CONFIGURE_COMMAND ${SCAFFOLD_DEPENDS_DIR}/meinspline/meinspline-master/configure ${ENABLE_SSE} --prefix=${SCAFFOLD_INSTALL_DIR}
-      BUILD_COMMAND make
+      BUILD_COMMAND make AM_CFLAGS=-fgnu89-inline
     )
     SET(EINSPLINE_LIBS einspline)
     MESSAGE(STATUS "EINSPLINE_HOME not found. Installing in SCAFFOLD_DEPENDS_DIR.")

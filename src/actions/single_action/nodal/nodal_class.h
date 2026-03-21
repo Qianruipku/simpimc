@@ -254,7 +254,7 @@ class Nodal : public SingleAction {
     /// Compute the determinant nodal action for time slice b_i
     void SetRhoF(const int b_i, const int b_j, const std::vector<std::shared_ptr<Bead>> &other_b_i, const std::vector<std::shared_ptr<Bead>> &other_b_j) {
         // Set slice distance
-        uint32_t abs_slice_diff = abs(species->bead_loop(b_i) - species->bead_loop(b_j));
+        uint32_t abs_slice_diff = std::abs((int32_t)(species->bead_loop(b_i) - species->bead_loop(b_j)));
         uint32_t min_slice_diff = std::min(abs_slice_diff, species->GetNBead() - abs_slice_diff);
 
         // Compute Gij matrix
@@ -277,7 +277,7 @@ class Nodal : public SingleAction {
     /// Compute the gradient of the nodal action for time slice b_i
     void SetRhoFGradRhoF(const int b_i, const std::vector<std::shared_ptr<Bead>> &ref_b, const std::vector<std::shared_ptr<Bead>> &other_b_i) {
         // Set slice distance
-        uint32_t abs_slice_diff = abs(species->bead_loop(b_i) - species->GetRefBead());
+        uint32_t abs_slice_diff = std::abs((int32_t)(species->bead_loop(b_i) - species->GetRefBead()));
         uint32_t min_slice_diff = std::min(abs_slice_diff, species->GetNBead() - abs_slice_diff);
 
         // Compute Gij matrix and its gradient

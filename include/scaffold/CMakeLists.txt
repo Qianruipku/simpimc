@@ -1,0 +1,25 @@
+# Link dependency libs and includes
+INCLUDE(ExternalProject)
+INCLUDE_DIRECTORIES(${SCAFFOLD_INSTALL_DIR}/include)
+LINK_DIRECTORIES(${SCAFFOLD_INSTALL_DIR}/lib)
+
+# Find optimize linear algebra routines
+INCLUDE(${SCAFFOLD_DIR}/CMake/FindLA.cmake)
+
+# Find HDF5
+INCLUDE(${SCAFFOLD_DIR}/CMake/FindHDF5.cmake)
+
+# Find matrix library
+IF(${SCAFFOLD_MATRIX_LIBRARY} STREQUAL "ARMADILLO")
+  SET(CMAKE_CXX_FLAGS "-DUSE_ARMADILLO ${CMAKE_CXX_FLAGS}")
+  INCLUDE(${SCAFFOLD_DIR}/CMake/FindArmadillo.cmake)
+ELSEIF(${SCAFFOLD_MATRIX_LIBRARY} STREQUAL "EIGEN")
+  SET(CMAKE_CXX_FLAGS "-DUSE_EIGEN ${CMAKE_CXX_FLAGS}")
+  INCLUDE(${SCAFFOLD_DIR}/CMake/FindEigen.cmake)
+ENDIF()
+
+# Include scaffold directory
+INCLUDE_DIRECTORIES(${SCAFFOLD_DIR})
+
+# Set scaffold libraries
+SET (SCAFFOLD_LIBS ${LA_LIBS} ${HDF5_LIBS} ${MATRIX_LIBS})

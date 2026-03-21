@@ -2,7 +2,7 @@
 # the project is compiled.
 
 IF(CMAKE_SYSTEM_NAME MATCHES "Linux")
-   EXEC_PROGRAM(cat ARGS "/proc/cpuinfo" OUTPUT_VARIABLE CPUINFO)
+   execute_process(COMMAND cat /proc/cpuinfo OUTPUT_VARIABLE CPUINFO)
 
    STRING(REGEX REPLACE "^.*(sse2).*$" "\\1" SSE_THERE ${CPUINFO})
    STRING(COMPARE EQUAL "sse2" "${SSE_THERE}" SSE2_TRUE)
@@ -41,7 +41,7 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Linux")
       set(SSE4_1_FOUND false CACHE BOOL "SSE4.1 available on host")
    ENDIF (SSE41_TRUE)
 ELSEIF(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-   EXEC_PROGRAM("/usr/sbin/sysctl -n machdep.cpu.features" OUTPUT_VARIABLE
+   execute_process(COMMAND /usr/sbin/sysctl -n machdep.cpu.features OUTPUT_VARIABLE
       CPUINFO)
 
    STRING(REGEX REPLACE "^.*[^S](SSE2).*$" "\\1" SSE_THERE ${CPUINFO})

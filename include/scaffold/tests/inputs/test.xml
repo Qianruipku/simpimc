@@ -1,0 +1,4 @@
+<Input>
+  <IO output_prefix="test" />
+  <Parallel procs_per_group="2" />
+</Input>

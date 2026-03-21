@@ -29,6 +29,7 @@ simpimc
 bin/
 build/
 include/
+!include/scaffold/
 depends/
 lib/
 share/

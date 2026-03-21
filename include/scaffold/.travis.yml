@@ -1,0 +1,31 @@
+language: cpp
+
+compiler:
+  - gcc
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq g++-4.8
+  - export CXX="g++-4.8" CC="gcc-4.8"
+  - sudo apt-get install -qq gfortran-4.8
+  - export F77="gfortran-4.8" FC="gfortran-4.8"
+  - export SCAFFOLD_TESTS_DIR="/home/travis/build/etano/scaffold/tests"
+  - mkdir ${SCAFFOLD_TESTS_DIR}/bin
+  - ln -s /usr/bin/g++-4.8 ${SCAFFOLD_TESTS_DIR}/bin/g++
+  - ln -s /usr/bin/gcc-4.8 ${SCAFFOLD_TESTS_DIR}/bin/gcc
+  - ln -s /usr/bin/gfortran-4.8 ${SCAFFOLD_TESTS_DIR}/bin/gfortran
+  - export PATH="${SCAFFOLD_TESTS_DIR}/bin:${PATH}"
+  - sudo apt-get install liblapack-dev
+  - sudo apt-get install -qq libopenmpi-dev openmpi-bin
+  - sudo apt-get install -qq libhdf5-serial-dev
+  - export HDF5_HOME=/usr
+
+install:
+  - mkdir ${SCAFFOLD_TESTS_DIR}/build && cd ${SCAFFOLD_TESTS_DIR}/build && cmake ..
+  - make install
+
+before_script:
+  - cd ${SCAFFOLD_TESTS_DIR}/inputs
+
+script: mpiexec -np 2 ${SCAFFOLD_TESTS_DIR}/bin/scaffold_test test.xml
