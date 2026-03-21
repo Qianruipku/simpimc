@@ -1,0 +1,109 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module coulcc ! in 
+    interface  ! in :coulcc
+        module csteed ! in :coulcc:coulcc36-f90.f90
+            real(kind=8) :: rerr
+            integer :: nfp
+            integer :: n11
+            integer dimension(2) :: npq
+            integer :: n20
+            integer dimension(2) :: kas
+        end module csteed
+        function f11(x,eta,zl,p,eps,limit,kin,err,nits,fpmax,acc8,acc16) ! in :coulcc:coulcc36-f90.f90
+            complex(kind=8) :: x
+            complex(kind=8) :: eta
+            complex(kind=8) :: zl
+            complex(kind=8) :: p
+            real(kind=8) :: eps
+            integer :: limit
+            integer :: kin
+            real(kind=8) :: err
+            integer :: nits
+            real(kind=8) :: fpmax
+            real(kind=8) :: acc8
+            real(kind=8) :: acc16
+            complex(kind=8) :: f11
+        end function f11
+        function f20(aa,bb,z,eps,jmax,re,fpmax,n,x) ! in :coulcc:coulcc36-f90.f90
+            complex(kind=8) :: aa
+            complex(kind=8) :: bb
+            complex(kind=8) :: z
+            real(kind=8) :: eps
+            integer, optional,check(shape(x, 0) == jmax),depend(x) :: jmax=shape(x, 0)
+            real(kind=8) :: re
+            real(kind=8) :: fpmax
+            integer :: n
+            complex(kind=8) dimension(jmax,4) :: x
+            complex(kind=8) :: f20
+        end function f20
+        function cf1a(rho,eta,xl,psi,eps,nmax,nused,fcl,re,fpmax,xx,g,c) ! in :coulcc:coulcc36-f90.f90
+            complex(kind=8) :: rho
+            complex(kind=8) :: eta
+            complex(kind=8) :: xl
+            complex(kind=8) :: psi
+            real(kind=8) :: eps
+            integer, optional,check(shape(xx, 1) == nmax),depend(xx) :: nmax=shape(xx, 1)
+            integer :: nused
+            complex(kind=8) :: fcl
+            real(kind=8) :: re
+            real(kind=8) :: fpmax
+            complex(kind=8) dimension(2,nmax) :: xx
+            complex(kind=8) dimension(nmax),depend(nmax) :: g
+            complex(kind=8) dimension(nmax),depend(nmax) :: c
+            complex(kind=8) :: cf1a
+        end function cf1a
+        module rcfcm ! in :coulcc:coulcc36-f90.f90
+            complex(kind=8) :: x0
+            complex(kind=8) :: x1
+            logical :: even
+            integer :: m2m1
+            integer :: mp12
+            integer :: m
+        end module rcfcm
+        subroutine rcf(a,b,ibeg,inum,xx,eps) ! in :coulcc:coulcc36-f90.f90
+            use rcfcm
+            complex(kind=8) dimension(100) :: a
+            complex(kind=8) dimension(100) :: b
+            integer :: ibeg
+            integer :: inum
+            complex(kind=8) dimension(2,100) :: xx
+            real(kind=8) :: eps
+        end subroutine rcf
+        module logamma ! in :coulcc:coulcc36-f90.f90
+            integer, parameter,optional :: kreal=8
+            real(kind=8) :: x0
+            real(kind=8) :: pi
+            real(kind=8) :: alpi
+            real(kind=8) :: hl2p
+            real(kind=8) :: accur
+            real(kind=8) dimension(15) :: b
+            real(kind=8) :: fplmin
+            integer, optional :: nx0=6
+            integer :: nt
+            integer, optional :: lerr=6
+            integer, optional :: nb=15
+        end module logamma
+        function clogam(z) ! in :coulcc:coulcc36-f90.f90
+            use logamma
+            complex(kind=8) :: z
+            complex(kind=8) :: clogam
+        end function clogam
+        function cdigam(z) ! in :coulcc:coulcc36-f90.f90
+            use logamma
+            complex(kind=8) :: z
+            complex(kind=8) :: cdigam
+        end function cdigam
+        subroutine gamma0(acc,fplmini) ! in :coulcc:coulcc36-f90.f90
+            use logamma
+            real(kind=8) :: acc
+            real(kind=8) :: fplmini
+        end subroutine gamma0
+        function tidy(z,acc) ! in :coulcc:coulcc36-f90.f90
+            complex(kind=8) :: z
+            real(kind=8) :: acc
+            complex(kind=8) :: tidy
+        end function tidy
+    end interface 
+end python module coulcc
