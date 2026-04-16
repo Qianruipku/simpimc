@@ -8,6 +8,7 @@
 #include "pair_correlation_class.h"
 #include "path_dump_class.h"
 #include "permutation_class.h"
+#include "pressure_class.h"
 #include "record_optimized_action_class.h"
 #include "sign_class.h"
 #include "structure_factor_class.h"
@@ -29,6 +30,8 @@ std::shared_ptr<Observable> ObservableFactory(Input& in, IO& out, Path& path, st
         return std::make_shared<PathDump>(path, in, out);
     else if (type == "Permutation")
         return std::make_shared<Permutation>(path, in, out);
+    else if (type == "Pressure")
+        return std::make_shared<Pressure>(path, actions, in, out);
     else if (type == "RecordOptimizedAction")
         return std::make_shared<RecordOptimizedAction>(path, actions, in, out);
     else if (type == "Sign")

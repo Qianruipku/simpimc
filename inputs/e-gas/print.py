@@ -9,8 +9,18 @@ with h5py.File('e.0.0.h5', 'r') as f:
     E = np.array(f['/Observables/Energy/total/x'])
     E = np.real(E[burn_in:])
 
+    pressure_total = None
+    pressure_ideal = None
+    pressure_virial = None
+    if '/Observables/Pressure/total/x' in f:
+        pressure_total = np.real(np.array(f['/Observables/Pressure/total/x'])[burn_in:])
+        pressure_ideal = np.real(np.array(f['/Observables/Pressure/ideal/x'])[burn_in:])
+        pressure_virial = np.real(np.array(f['/Observables/Pressure/virial/x'])[burn_in:])
+
     # print("Raw energy data:", E)
     print("Energy data length:", len(E))
+    if pressure_total is not None:
+        print("Pressure data length:", len(pressure_total))
 
     # 打印 move 接受率
     for move in ["BisecteU", "BisecteD"]:
@@ -30,3 +40,8 @@ with h5py.File('e.0.0.h5', 'r') as f:
         with open("energy.txt", 'w') as out:
             out.write(str(reblock_data[int(opt[0])]))
             print(str(reblock_data[int(opt[0])]))
+
+    if pressure_total is not None and len(pressure_total) > 0:
+        print(f"Pressure mean: {np.mean(pressure_total)}")
+        print(f"Pressure ideal mean: {np.mean(pressure_ideal)}")
+        print(f"Pressure virial mean: {np.mean(pressure_virial)}")

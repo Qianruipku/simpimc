@@ -10,7 +10,8 @@ theta = globals().get('theta', 1.0)
 rs = globals().get('rs', 1.0)
 seed = globals().get('seed', 1428586593)
 lambda_e = globals().get('lambda_e', 0.5)
-print('Running gen_input.py with:', {'M': M, 'N': N, 'pol': pol, 'theta': theta, 'rs': rs, 'seed': seed, 'lambda_e': lambda_e})
+enable_pressure = globals().get('enable_pressure', False)
+print('Running gen_input.py with:', {'M': M, 'N': N, 'pol': pol, 'theta': theta, 'rs': rs, 'seed': seed, 'lambda_e': lambda_e, 'enable_pressure': enable_pressure})
 
 # Physical quantity calculations
 if pol:
@@ -64,6 +65,8 @@ for sp in species_list:
 
 observables = ET.SubElement(root, 'Observables')
 ET.SubElement(observables, 'Observable', name='Energy', type='Energy', skip='1')
+if enable_pressure:
+    ET.SubElement(observables, 'Observable', name='Pressure', type='Pressure', skip='1')
 ET.SubElement(observables, 'Observable', name='PathDump', type='PathDump', skip='1')
 ET.SubElement(observables, 'Observable', name='Time', type='Time')
 
@@ -73,6 +76,8 @@ loop_inner = ET.SubElement(loop_outer, 'Loop', n_step='100')
 for sp in species_list:
     ET.SubElement(loop_inner, 'Move', name=f'Bisect{sp["name"]}')
 ET.SubElement(loop_inner, 'Observable', name='Energy')
+if enable_pressure:
+    ET.SubElement(loop_inner, 'Observable', name='Pressure')
 ET.SubElement(loop_outer, 'Write')
 
 tree = ET.ElementTree(root)
