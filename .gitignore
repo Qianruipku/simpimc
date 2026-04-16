@@ -27,7 +27,7 @@ inputs/*/*.txt
 inputs/*/INPUT
 simpimc
 bin/
-build/
+build*/
 include/
 !include/scaffold/
 depends/

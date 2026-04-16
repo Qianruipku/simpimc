@@ -98,7 +98,7 @@ class Species {
     };
 
     /// Cheap way to do beta periodicity
-    const uint32_t bead_loop(const uint32_t b_i) { return b_i >= n_bead_ ? b_i - n_bead_ : b_i; }
+    const uint32_t bead_loop(const uint32_t b_i) { return b_i % n_bead_; }
 
     /// Returns a specific bead given its species, particle number, and time slice
     const std::shared_ptr<Bead>& GetBead(const uint32_t p_i, const uint32_t b_i) { return bead_(p_i, bead_loop(b_i)); };

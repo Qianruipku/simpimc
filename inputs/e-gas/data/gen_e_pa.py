@@ -9,12 +9,13 @@ from GenPairAction import *
 # Units
 units = {'energy':'H', 'distance':'A'}
 
-# Settings for e-gas
-M = 128 # number of time slices
-N = 2 # number electrons
-pol = 0 # if polarized or not
-theta = 1. # T/T_F
-rs = 1. # Wigner Seits Radius
+# Settings for e-gas — allow overrides from init_globals when run via runpy.run_path
+M = globals().get('M', 128)  # number of time slices
+N = globals().get('N', 2)     # number electrons
+pol = globals().get('pol', 0) # if polarized or not
+theta = globals().get('theta', 1.0) # T/T_F
+rs = globals().get('rs', 1.0) # Wigner Seits Radius
+print('Running gen_e_pa.py with:', {'M': M, 'N': N, 'pol': pol, 'theta': theta, 'rs': rs})
 
 # Calculate things
 # Fermi Temp (see Martin pg 103 (only he uses atomic units))
