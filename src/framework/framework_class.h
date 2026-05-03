@@ -93,7 +93,8 @@ class Framework {
 #endif
         } else {
 #if USE_MPI
-            seed = in.GetChild("RNG").GetAttribute<int>("seed", (int)time(0) * (my_group_ + 1));
+            int base_seed = in.GetChild("RNG").GetAttribute<int>("seed", (int)time(0));
+            seed = base_seed + (int)my_group_;
 #else
             seed = in.GetChild("RNG").GetAttribute<int>("seed", (int)time(0));
 #endif
@@ -102,7 +103,7 @@ class Framework {
         out.CreateGroup("RNG");
         out.Write("RNG/seed", seed);
 
-        // Simulation
+        // Use group index for group-level initialization semantics.
         Simulation sim(in, out, rng, my_group_, intra_comm);
         sim.Run();
     }

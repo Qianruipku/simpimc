@@ -45,6 +45,24 @@ struct HDF5TypeTraits {
   PRIMITIVE(float, H5::FloatType, H5::PredType::NATIVE_FLOAT);
 #undef PRIMITIVE
 
+// Specialization of HDF5TypeTraits for const primitive types
+#define PRIMITIVE_CONST(Type, H5PredType, H5Type) \
+        template<> \
+        H5::PredType HDF5TypeTraits<Type const>::GetType(Type const&) { return H5Type; } \
+        template<> \
+        size_t HDF5TypeTraits<Type const>::GetSize(Type const&) { return 1; } \
+        template<> \
+        void* HDF5TypeTraits<Type const>::GetAddr(Type const& val) { return (void*)&val; } \
+        template<> \
+        const int HDF5TypeTraits<Type const>::GetDim(Type const& val, int d) { return 1; } \
+        template<> \
+        const int HDF5TypeTraits<Type const>::GetRank(Type const& val) { return 0; }
+  PRIMITIVE_CONST(double, H5::FloatType, H5::PredType::NATIVE_DOUBLE);
+  PRIMITIVE_CONST(float, H5::FloatType, H5::PredType::NATIVE_FLOAT);
+  PRIMITIVE_CONST(int, H5::IntType, H5::PredType::NATIVE_INT);
+  PRIMITIVE_CONST(unsigned int, H5::IntType, H5::PredType::NATIVE_UINT);
+#undef PRIMITIVE_CONST
+
 // Specialization of HDF5TypeTraits for armadillo types
 #ifdef USE_ARMADILLO
   #define ARMATYPE(Type, ElemType, H5PredType, H5Type) \
