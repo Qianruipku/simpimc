@@ -120,6 +120,10 @@ for sp in species_list:
 
 observables = ET.SubElement(root, 'Observables')
 ET.SubElement(observables, 'Observable', name='Energy', type='Energy')
+# For direct fermion sampling (no fixed-node), collect sign for reweighting:
+#   E = <sE>/<s>
+if not use_fixed_node:
+    ET.SubElement(observables, 'Observable', name='Sign', type='Sign')
 if enable_pressure:
     ET.SubElement(observables, 'Observable', name='Pressure', type='Pressure')
 ET.SubElement(observables, 'Observable', name='PathDump', type='PathDump', skip='40000')
@@ -131,6 +135,8 @@ loop_inner = ET.SubElement(loop_outer, 'Loop', n_step='100')
 for sp in species_list:
     ET.SubElement(loop_inner, 'Move', name=f'Bisect{sp["name"]}')
 ET.SubElement(loop_inner, 'Observable', name='Energy')
+if not use_fixed_node:
+    ET.SubElement(loop_inner, 'Observable', name='Sign')
 if enable_pressure:
     ET.SubElement(loop_inner, 'Observable', name='Pressure')
 ET.SubElement(loop_outer, 'Write')
