@@ -20,6 +20,8 @@ def main():
     parser.add_argument('--rs', type=float, default=1.0, help='Wigner-Seitz radius')
     parser.add_argument('--seed', type=int, default=1428586593, help='RNG seed passed to gen_input')
     parser.add_argument('--lambda_e', type=float, default=0.5, help='electron lambda passed to gen_input')
+    parser.add_argument('--use_fixed_node', type=int, choices=(0, 1), default=1, help='enable fixed-node approximation (0 or 1)')
+    parser.add_argument('--nodal_action_type', type=str, default='FreeNodal', choices=('FreeNodal', 'OptimizedFreeNodal', 'OptimizedSHONodal'), help='type of nodal action')
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -46,6 +48,8 @@ def main():
             'rs': args.rs,
             'seed': args.seed,
             'lambda_e': args.lambda_e,
+            'use_fixed_node': args.use_fixed_node,
+            'nodal_action_type': args.nodal_action_type,
         }
 
         print('Running gen_input.py with:', init_globals)
